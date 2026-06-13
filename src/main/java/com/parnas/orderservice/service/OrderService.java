@@ -4,7 +4,6 @@ import com.parnas.orderservice.config.RabbitConfig;
 import com.parnas.orderservice.dto.req.CreateOrderRequest;
 import com.parnas.orderservice.dto.resp.OrderDetailResponse;
 import com.parnas.orderservice.dto.resp.OrderResponse;
-import com.parnas.orderservice.exception.InvalidOrderStatusException;
 import com.parnas.orderservice.exception.OrderNotFoundException;
 import com.parnas.orderservice.mapper.OrderMapper;
 import com.parnas.orderservice.messaging.OrderCreatedEvent;
@@ -67,8 +66,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderDetailResponse updateStatus(UUID id, String statusValue) {
-        OrderStatus status = parseStatus(statusValue);
+    public OrderDetailResponse updateStatus(UUID id, OrderStatus status) {
         Order order = orderRepository.findByIdWithItems(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
         order.setStatus(status);
@@ -111,16 +109,5 @@ public class OrderService {
         return order.getItems().stream()
                 .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private OrderStatus parseStatus(String value) {
-        if (value == null) {
-            throw new InvalidOrderStatusException(null);
-        }
-        try {
-            return OrderStatus.valueOf(value.trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new InvalidOrderStatusException(value);
-        }
     }
 }
