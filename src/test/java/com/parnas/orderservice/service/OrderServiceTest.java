@@ -4,7 +4,6 @@ import com.parnas.orderservice.config.RabbitConfig;
 import com.parnas.orderservice.dto.req.CreateOrderRequest;
 import com.parnas.orderservice.dto.req.OrderItemRequest;
 import com.parnas.orderservice.dto.resp.OrderDetailResponse;
-import com.parnas.orderservice.exception.InvalidOrderStatusException;
 import com.parnas.orderservice.exception.OrderNotFoundException;
 import com.parnas.orderservice.mapper.OrderMapper;
 import com.parnas.orderservice.messaging.OrderCreatedEvent;
@@ -30,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -100,13 +98,20 @@ class OrderServiceTest {
     }
 
     @Test
-    void updateStatus_whenStatusInvalid_throwsAndDoesNotTouchRepository() {
+    void updateStatus_updatesStatusAndReturnsResponse() {
         UUID id = UUID.randomUUID();
+        Order order = new Order();
+        order.setId(id);
+        order.setStatus(OrderStatus.CREATED);
+        when(orderRepository.findByIdWithItems(id)).thenReturn(Optional.of(order));
+        OrderDetailResponse expected = new OrderDetailResponse(id, "Alice",
+                order.getOrderDate(), OrderStatus.COMPLETED, List.of());
+        when(orderMapper.toDetailResponse(order)).thenReturn(expected);
 
-        assertThatThrownBy(() -> orderService.updateStatus(id, "UNKNOWN"))
-                .isInstanceOf(InvalidOrderStatusException.class);
+        OrderDetailResponse result = orderService.updateStatus(id, OrderStatus.COMPLETED);
 
-        verify(orderRepository, never()).findByIdWithItems(any());
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.COMPLETED);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test

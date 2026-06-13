@@ -1,7 +1,6 @@
 package com.parnas.orderservice.controller;
 
 import com.parnas.orderservice.exception.ApiError;
-import com.parnas.orderservice.exception.InvalidOrderStatusException;
 import com.parnas.orderservice.exception.OrderNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -26,12 +25,6 @@ public class GlobalControllerAdvice {
     public ResponseEntity<ApiError> handleOrderNotFound(OrderNotFoundException ex, HttpServletRequest request) {
         log.warn("Order not found: {}", ex.getMessage());
         return build(HttpStatus.NOT_FOUND, ex.getMessage(), request);
-    }
-
-    @ExceptionHandler(InvalidOrderStatusException.class)
-    public ResponseEntity<ApiError> handleInvalidStatus(InvalidOrderStatusException ex, HttpServletRequest request) {
-        log.warn("Invalid order status: {}", ex.getMessage());
-        return build(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

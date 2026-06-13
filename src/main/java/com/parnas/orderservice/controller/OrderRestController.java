@@ -1,6 +1,7 @@
 package com.parnas.orderservice.controller;
 
 import com.parnas.orderservice.dto.req.CreateOrderRequest;
+import com.parnas.orderservice.dto.req.UpdateStatusRequest;
 import com.parnas.orderservice.dto.resp.OrderDetailResponse;
 import com.parnas.orderservice.dto.resp.OrderResponse;
 import com.parnas.orderservice.dto.resp.TotalAmountResponse;
@@ -52,8 +53,9 @@ public class OrderRestController {
     }
 
     @PutMapping("/{id}/status")
-    public OrderDetailResponse updateStatus(@PathVariable UUID id, @RequestParam String status) {
-        return orderService.updateStatus(id, status);
+    public OrderDetailResponse updateStatus(@PathVariable UUID id,
+                                            @Valid @RequestBody UpdateStatusRequest request) {
+        return orderService.updateStatus(id, request.status());
     }
 
     @GetMapping("/stats/total-amount")
