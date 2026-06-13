@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: DDL/001-create-tables.sql
+      relativeToChangelogFile: true
+  - include:
+      file: DDL/002-create-indexes.sql
+      relativeToChangelogFile: true
